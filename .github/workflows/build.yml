@@ -1,0 +1,45 @@
+# Ein Name für diesen Prozess, der auf der GitHub-Webseite angezeigt wird.
+name: Build Android APK
+
+# Der "Auslöser": Wann soll dieser Prozess starten?
+on:
+  push:
+    # Er soll starten, wenn neuer Code auf den "master" oder "main" Branch hochgeladen wird.
+    branches: [ "master", "main" ]
+
+# Die "Jobs": Was soll getan werden?
+jobs:
+  # Wir definieren einen Job namens "build".
+  build:
+    # Die "Umgebung": Wo soll der Job laufen?
+    # Er soll auf einem frischen, virtuellen Computer mit der neusten Ubuntu Linux Version laufen.
+    runs-on: ubuntu-latest
+
+    # Die "Schritte": Eine Abfolge von Aktionen, die nacheinander ausgeführt werden.
+    steps:
+    # 1. Schritt: Lade den Code herunter.
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2. Schritt: Baue die App mit Buildozer.
+    - name: Build with Buildozer
+      # Dies ist eine vorgefertigte "Action" aus der Community, die die ganze
+      # komplizierte Installation von Buildozer, Android SDK, NDK etc. übernimmt.
+      uses: ArtemSBulgakov/buildozer-action@v1
+      # Wir geben diesem Schritt einen Namen ("id"), damit wir später darauf zugreifen können.
+      id: buildozer
+      with:
+        # Hier sagen wir der Action, welchen Befehl sie ausführen soll.
+        command: buildozer android debug
+
+    # 3. Schritt: Lade die fertige APK-Datei hoch.
+    - name: Upload APK
+      # Dies ist eine weitere vorgefertigte Action.
+      uses: actions/upload-artifact@v3
+      with:
+        # Der Name des Download-Pakets.
+        name: package
+        # Der Pfad zur Datei, die hochgeladen werden soll.
+        # Dieser komplexe Ausdruck bedeutet: "Nimm den Dateinamen, den der
+        # vorherige Schritt ('buildozer') als Ergebnis ausgegeben hat".
+        path: ${{ steps.buildozer.outputs.filename }}
