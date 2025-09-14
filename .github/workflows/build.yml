@@ -15,7 +15,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.11' # Use a stable Python version
+        python-version: '3.11'
 
     - name: Install system dependencies
       run: |
@@ -37,5 +37,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: package
-        # Buildozer places the APK in the bin/ directory
+        # THIS IS THE CORRECTED LINE:
         path: bin/*.apk
