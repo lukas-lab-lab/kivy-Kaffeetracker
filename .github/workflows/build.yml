@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK (Manual)
 
 on:
   push:
@@ -12,15 +12,30 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: Build with Buildozer
-      # THIS IS THE CORRECTED LINE:
-      uses: ArtemSBulgakov/buildozer-action@v1.2.0
-      id: buildozer
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        command: buildozer android debug
+        python-version: '3.11' # Use a stable Python version
+
+    - name: Install system dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y git zip unzip openjdk-17-jdk python3-pip python3-venv autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
+
+    - name: Create and activate virtual environment
+      run: |
+        python3 -m venv .build-venv
+        source .build-venv/bin/activate
+        pip install buildozer cython setuptools sh
+
+    - name: Build the APK
+      run: |
+        source .build-venv/bin/activate
+        buildozer android debug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: package
-        path: ${{ steps.buildozer.outputs.filename }}
+        # Buildozer places the APK in the bin/ directory
+        path: bin/*.apk
